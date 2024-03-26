@@ -105,8 +105,28 @@ stages:
             - task: TerraformCLI@0
               displayName: Terraform Apply
               inputs:
-                command: 'apply'
-                workingDirectory: '$(Pipeline.Workspace)/terraform-manifests-out'
-                environmentServiceName: 'terraform-aks-azurerm-svc-con'
-                commandOptions: '$(Pipeline.Workspace)/terraform-manifests-out/$(DEV_ENVIRONMENT)-$(Build.BuildId).out'
-                allowTelemetryCollection: false          
+               command: 'apply'
+               workingDirectory: '$(Pipeline.Workspace)/terraform-manifests-out'
+               environmentServiceName: 'terraform-aks-azurerm-svc-con'
+               commandOptions: '$(Pipeline.Workspace)/terraform-manifests-out/$(DEV_ENVIRONMENT)-$(Build.BuildId).out'
+               allowTelemetryCollection: false
+
+            - script: |
+                cat kube-manifests/01-Dev-Environment copy
+
+            - task: Kubernetes@1
+              inputs:
+               connectionType: 'Azure Resource Manager'
+               azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
+               azureResourceGroup: 'terraform-aks-dev'
+               kubernetesCluster: 'terraform-aks-dev-cluster'
+               useClusterAdmin: true
+               namespace: 'dev-env'
+               command: 'apply'
+               secretType: 'dockerRegistry'
+               containerRegistryType: 'Azure Container Registry'
+               azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
+               azureContainerRegistry: 'javancapstone.azurecr.io'
+               secretName: 'acr-credentials'
+
+            
