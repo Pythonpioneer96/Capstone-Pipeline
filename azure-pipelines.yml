@@ -130,12 +130,12 @@ stages:
         azureResourceGroup: 'terraform-aks-dev'
         kubernetesCluster: 'terraform-aks-dev-cluster'
         useClusterAdmin: true
-        namespace: 'dev-env'
+        namespace: 'default'
         command: 'apply'
         secretType: 'dockerRegistry'
         containerRegistryType: 'Azure Container Registry'
         azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
         azureContainerRegistry: 'javancapstone.azurecr.io'
-        secretName: 'acr-credentials'
+        # secretName: 'acr-credentials'
 
             
