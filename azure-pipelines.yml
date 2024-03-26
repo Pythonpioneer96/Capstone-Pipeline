@@ -122,20 +122,21 @@ stages:
     steps:
     - script: |
         cat kube-manifests/01-Dev-Environment/01-Dev-namespace.yaml
+      displayName: 'Display YAML file content'
 
     - task: Kubernetes@1
       inputs:
-       connectionType: 'Azure Resource Manager'
-       azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
-       azureResourceGroup: 'terraform-aks-dev'
-       kubernetesCluster: 'terraform-aks-dev-cluster'
-       namespace: 'default'
-       command: 'apply'
-       arguments: '-f path/to/your/resource.yaml'
-       secretType: 'dockerRegistry'
-       containerRegistryType: 'Azure Container Registry'
-       azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
-       azureContainerRegistry: 'javancapstone.azurecr.io'
+        connectionType: 'Azure Resource Manager'
+        azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
+        azureResourceGroup: 'terraform-aks-dev'
+        kubernetesCluster: 'terraform-aks-dev-cluster'
+        namespace: 'default'
+        command: 'apply'
+        arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/01-Dev-namespace.yaml'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+        azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
+        azureContainerRegistry: 'javancapstone.azurecr.io'
 
 
             
