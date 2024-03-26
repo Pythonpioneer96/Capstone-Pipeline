@@ -121,7 +121,7 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: |
-        cat kube-manifests/01-Dev-Environment
+        cat kube-manifests/01-Dev-Environment/*
 
     - task: Kubernetes@1
       inputs:
