@@ -105,8 +105,38 @@ stages:
             - task: TerraformCLI@0
               displayName: Terraform Apply
               inputs:
-                command: 'apply'
-                workingDirectory: '$(Pipeline.Workspace)/terraform-manifests-out'
-                environmentServiceName: 'terraform-aks-azurerm-svc-con'
-                commandOptions: '$(Pipeline.Workspace)/terraform-manifests-out/$(DEV_ENVIRONMENT)-$(Build.BuildId).out'
-                allowTelemetryCollection: false          
+               command: 'apply'
+               workingDirectory: '$(Pipeline.Workspace)/terraform-manifests-out'
+               environmentServiceName: 'terraform-aks-azurerm-svc-con'
+               commandOptions: '$(Pipeline.Workspace)/terraform-manifests-out/$(DEV_ENVIRONMENT)-$(Build.BuildId).out'
+               allowTelemetryCollection: false
+
+
+- stage: ApplyKubernetesManifests
+  displayName: Apply Kubernetes Manifests
+  jobs:
+  - job: ApplyManifestsJob
+    displayName: Apply Manifests
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        cat kube-manifests/01-Dev-Environment/01-Dev-namespace.yaml
+      displayName: 'Display YAML file content'
+
+    - task: Kubernetes@1
+      inputs:
+        connectionType: 'Azure Resource Manager'
+        azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
+        azureResourceGroup: 'terraform-aks-dev'
+        kubernetesCluster: 'terraform-aks-dev-cluster'
+        namespace: 'default'
+        command: 'apply'
+        arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/01-Dev-namespace.yaml'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+        azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
+        azureContainerRegistry: 'javancapstone.azurecr.io'
+
+
+            
