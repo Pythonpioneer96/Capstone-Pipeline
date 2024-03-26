@@ -146,10 +146,22 @@ stages:
         kubernetesCluster: 'terraform-aks-dev-cluster'
         namespace: 'dev-env'
         command: 'apply'
-        arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/02-Dev-deployment.yaml'
+        arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/02-secrets-dev.yaml'
         secretType: 'dockerRegistry'
         containerRegistryType: 'Azure Container Registry'
         azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
         azureContainerRegistry: 'javancapstone.azurecr.io'  
 
-            
+    - task: Kubernetes@1
+      inputs:
+        connectionType: 'Azure Resource Manager'
+        azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
+        azureResourceGroup: 'terraform-aks-dev'
+        kubernetesCluster: 'terraform-aks-dev-cluster'
+        namespace: 'dev-env'
+        command: 'apply'
+        arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/03-Dev-deployment.yaml'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+        azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
+        azureContainerRegistry: 'javancapstone.azurecr.io'          
