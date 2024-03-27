@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app1-nginx-deployment
-  namespace: qa-env
+  namespace: prod-env
   labels:
     app: app1-nginx
 spec:
@@ -20,7 +20,24 @@ spec:
           image: javancapstone.azurecr.io/capstonedockertest1:e3a320387a06adeb2c724b3b8493b56f933e3050
           ports:
             - containerPort: 80
-      imagePullSecrets:  # Add this field
-        - name: acr-credentials  # Replace with the name of your secret
+      imagePullSecrets:
+        - name: acr-credentials
       nodeSelector:
         app: system-apps
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1-nginx-clusterip-service
+  namespace: dev-env
+  labels:
+    app: app1-nginx
+spec:
+  type: LoadBalancer
+  selector:
+    app: app1-nginx
+  ports:
+    - port: 80
+      targetPort: 80
