@@ -32,13 +32,7 @@ stages:
           targetPath: '$(System.DefaultWorkingDirectory)/terraform-manifests'
           artifact: 'terraform-manifests-out'
           publishLocation: 'pipeline'
-      # - task: PublishPipelineArtifact@1
-      #   displayName: Publish Kuberente Artifacts
-      #   inputs:
-      #     targetPath: '$(System.DefaultWorkingDirectory)/kube-manifests'
-      #     artifact: 'kube-manifests-out'
-      #     publishLocation: 'pipeline'
-
+     
     
       - task: AzureCLI@2
         inputs:
@@ -156,64 +150,7 @@ stages:
       inputs:
        PathtoPublish: '$(Build.ArtifactStagingDirectory)/kube-manifests'
        ArtifactName: 'kube-manifests'       
-
-
-# - stage: ApplyKubernetesManifests
-#   displayName: Apply Kubernetes Manifests
-#   jobs:
-#   - job: ApplyManifestsJob
-#     displayName: Apply Manifests
-#     pool:
-#       vmImage: 'ubuntu-latest'
-#     steps:
-#     - script: |
-#         cat kube-manifests/01-Dev-Environment/01-Dev-namespace.yaml
-#       displayName: 'Display YAML file content'
-
-
-#     - task: Kubernetes@1
-#       inputs:
-#         connectionType: 'Azure Resource Manager'
-#         azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
-#         azureResourceGroup: 'terraform-aks-dev'
-#         kubernetesCluster: 'terraform-aks-dev-cluster'
-#         namespace: 'default'
-#         command: 'apply'
-#         arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/01-Dev-namespace.yaml'
-#         secretType: 'dockerRegistry'
-#         containerRegistryType: 'Azure Container Registry'
-#         azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
-#         azureContainerRegistry: 'javancapstone.azurecr.io'
-        
-#     - task: Kubernetes@1
-#       inputs:
-#         connectionType: 'Azure Resource Manager'
-#         azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
-#         azureResourceGroup: 'terraform-aks-dev'
-#         kubernetesCluster: 'terraform-aks-dev-cluster'
-#         namespace: 'dev-env'
-#         command: 'apply'
-#         arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/02-secrets-dev.yaml'
-#         secretType: 'dockerRegistry'
-#         containerRegistryType: 'Azure Container Registry'
-#         azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
-#         azureContainerRegistry: 'javancapstone.azurecr.io'  
-
-
-#     - task: Kubernetes@1
-#       inputs:
-#         connectionType: 'Azure Resource Manager'
-#         azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
-#         azureResourceGroup: 'terraform-aks-dev'
-#         kubernetesCluster: 'terraform-aks-dev-cluster'
-#         namespace: 'dev-env'
-#         command: 'apply'
-#         arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/03-Dev-deployment.yaml'
-#         secretType: 'dockerRegistry'
-#         containerRegistryType: 'Azure Container Registry'
-#         azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
-#         azureContainerRegistry: 'javancapstone.azurecr.io'          
-
+      
 - stage: ExecuteAzureCLI
   displayName: 'Execute Azure CLI Command'
   jobs:
