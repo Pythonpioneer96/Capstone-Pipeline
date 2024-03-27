@@ -39,17 +39,7 @@ stages:
       #     artifact: 'kube-manifests-out'
       #     publishLocation: 'pipeline'
 
-      - task: CopyFiles@2
-        displayName: Copy Kuberente Artifacts
-        inputs:
-        SourceFolder: 'kube-manifests'
-        Contents: '**'  # Optionally, specify file patterns
-        TargetFolder: '$(Build.ArtifactStagingDirectory)/kube-manifests'
-      - task: PublishBuildArtifacts@1
-        displayName: Publish Kuberente Artifacts  
-        inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/kube-manifests'
-        ArtifactName: 'kube-manifests'          
+    
       - task: AzureCLI@2
         inputs:
           azureSubscription: 'terraform-aks-azurerm-svc-con'
@@ -135,7 +125,17 @@ stages:
                commandOptions: '$(Pipeline.Workspace)/terraform-manifests-out/$(DEV_ENVIRONMENT)-$(Build.BuildId).out'
                allowTelemetryCollection: false
 
-            
+            - task: CopyFiles@2
+              displayName: Copy Kuberente Artifacts
+              inputs:
+               SourceFolder: 'kube-manifests'
+               Contents: '**'  # Optionally, specify file patterns
+               TargetFolder: '$(Build.ArtifactStagingDirectory)/kube-manifests'
+            - task: PublishBuildArtifacts@1
+              displayName: Publish Kuberente Artifacts  
+              inputs:
+               PathtoPublish: '$(Build.ArtifactStagingDirectory)/kube-manifests'
+               ArtifactName: 'kube-manifests'       
 
 
 # - stage: ApplyKubernetesManifests
