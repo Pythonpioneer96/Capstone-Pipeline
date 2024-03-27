@@ -214,6 +214,23 @@ stages:
 #         azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
 #         azureContainerRegistry: 'javancapstone.azurecr.io'          
 
+- stage: ExecuteAzureCLI
+  displayName: 'Execute Azure CLI Command'
+  jobs:
+  - job: ExecuteAzureCLIJob
+    displayName: 'Execute Azure CLI Command'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: AzureCLI@2
+      displayName: 'Azure CLI - Execute Command'
+      inputs:
+        azureSubscription: 'acrpull'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          # Replace this with your Azure CLI command
+           az aks update -n terraform-aks-dev-cluster -g terraform-aks-dev --attach-acr javancapstone
 
 
 
