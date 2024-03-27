@@ -1,7 +1,3 @@
-provider "azurerm" {
-  features {}
-}
-
 resource "azurerm_role_assignment" "aks_owner" {
   scope                = "/subscriptions/606e824b-aaf7-4b4e-9057-b459f6a4436d/resourceGroups/terraform-aks-dev/providers/Microsoft.ContainerService/managedClusters/terraform-aks-dev-cluster"
   role_definition_name = "Owner"
