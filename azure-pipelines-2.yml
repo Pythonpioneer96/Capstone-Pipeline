@@ -125,17 +125,37 @@ stages:
                commandOptions: '$(Pipeline.Workspace)/terraform-manifests-out/$(DEV_ENVIRONMENT)-$(Build.BuildId).out'
                allowTelemetryCollection: false
 
-            - task: CopyFiles@2
-              displayName: Copy Kuberente Artifacts
-              inputs:
-               SourceFolder: 'kube-manifests'
-               Contents: '**'  # Optionally, specify file patterns
-               TargetFolder: '$(Build.ArtifactStagingDirectory)/kube-manifests'
-            - task: PublishBuildArtifacts@1
-              displayName: Publish Kuberente Artifacts  
-              inputs:
-               PathtoPublish: '$(Build.ArtifactStagingDirectory)/kube-manifests'
-               ArtifactName: 'kube-manifests'       
+
+- stage: CopyAndPublishArtifacts
+  displayName: 'Copy and Publish Kuberente Artifacts'
+  jobs:
+  - job: CopyAndPublishArtifactsJob
+    displayName: 'Copy and Publish Kuberente Artifacts'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: CopyFiles@2
+      displayName: 'Copy Kuberente Artifacts'
+      inputs:
+        SourceFolder: 'kube-manifests'
+        Contents: '**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/kube-manifests'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Kuberente Artifacts'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/kube-manifests'
+        ArtifactName: 'kube-manifests'
+    - task: CopyFiles@2
+      displayName: Copy Kuberente Artifacts
+      inputs:
+       SourceFolder: 'kube-manifests'
+       Contents: '**'  # Optionally, specify file patterns
+       TargetFolder: '$(Build.ArtifactStagingDirectory)/kube-manifests'
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Kuberente Artifacts  
+      inputs:
+       PathtoPublish: '$(Build.ArtifactStagingDirectory)/kube-manifests'
+       ArtifactName: 'kube-manifests'       
 
 
 # - stage: ApplyKubernetesManifests
