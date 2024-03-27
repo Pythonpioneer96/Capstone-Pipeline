@@ -2,8 +2,12 @@ trigger:
 - main
 
 
+
+
 pool:
   vmImage: 'ubuntu-latest'
+
+
 
 
 # Define Variables
@@ -14,10 +18,14 @@ variables:
   value: qa 
 
 
+
+
 # Stage-1: Terraform Validate Stage
 ## Step-1: Publish Artifacts to Pipeline (Pipeline artifacts provide a way to share files between stages in a pipeline or between different pipelines. )
 ## Step-2: Install Latest Terraform (0.13.5) (Ideally not needed if we use default Ubuntu Agents)
 ## Step-3: Validate Terraform Manifests (terraform init, terraform validate)
+
+
 
 
 stages:
@@ -39,6 +47,7 @@ stages:
       #     artifact: 'kube-manifests-out'
       #     publishLocation: 'pipeline'
 
+
     
       - task: AzureCLI@2
         inputs:
@@ -50,6 +59,8 @@ stages:
             curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
             sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
             sudo apt-get update && sudo apt-get install terraform
+
+
 
 
       - task: TerraformCLI@0
@@ -70,6 +81,8 @@ stages:
           command: 'validate'
           workingDirectory: '$(System.DefaultWorkingDirectory)/terraform-manifests'
           allowTelemetryCollection: false      
+
+
 
 
 # Stage-2: Deploy Stages for Dev & QA
@@ -126,6 +139,8 @@ stages:
                allowTelemetryCollection: false
 
 
+
+
 - stage: CopyAndPublishArtifacts
   displayName: 'Copy and Publish Kuberente Artifacts'
   jobs:
@@ -158,6 +173,8 @@ stages:
        ArtifactName: 'kube-manifests'       
 
 
+
+
 # - stage: ApplyKubernetesManifests
 #   displayName: Apply Kubernetes Manifests
 #   jobs:
@@ -171,50 +188,137 @@ stages:
 #       displayName: 'Display YAML file content'
 
 
-#     - task: Kubernetes@1
+# - stage: ExecuteAzureCLI
+#   displayName: 'Execute Azure CLI Command'
+#   jobs:
+#   - job: ExecuteAzureCLIJob
+#     displayName: 'Execute Azure CLI Command'
+#     pool:
+#       vmImage: 'ubuntu-latest'
+#     steps:
+#     - task: AzureCLI@2
+#       displayName: 'Azure CLI - Execute Command'
 #       inputs:
-#         connectionType: 'Azure Resource Manager'
-#         azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
-#         azureResourceGroup: 'terraform-aks-dev'
-#         kubernetesCluster: 'terraform-aks-dev-cluster'
-#         namespace: 'default'
-#         command: 'apply'
-#         arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/01-Dev-namespace.yaml'
-#         secretType: 'dockerRegistry'
-#         containerRegistryType: 'Azure Container Registry'
-#         azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
-#         azureContainerRegistry: 'javancapstone.azurecr.io'
-        
-#     - task: Kubernetes@1
-#       inputs:
-#         connectionType: 'Azure Resource Manager'
-#         azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
-#         azureResourceGroup: 'terraform-aks-dev'
-#         kubernetesCluster: 'terraform-aks-dev-cluster'
-#         namespace: 'dev-env'
-#         command: 'apply'
-#         arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/02-secrets-dev.yaml'
-#         secretType: 'dockerRegistry'
-#         containerRegistryType: 'Azure Container Registry'
-#         azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
-#         azureContainerRegistry: 'javancapstone.azurecr.io'  
-
-
-#     - task: Kubernetes@1
-#       inputs:
-#         connectionType: 'Azure Resource Manager'
-#         azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
-#         azureResourceGroup: 'terraform-aks-dev'
-#         kubernetesCluster: 'terraform-aks-dev-cluster'
-#         namespace: 'dev-env'
-#         command: 'apply'
-#         arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/03-Dev-deployment.yaml'
-#         secretType: 'dockerRegistry'
-#         containerRegistryType: 'Azure Container Registry'
-#         azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
-#         azureContainerRegistry: 'javancapstone.azurecr.io'          
+#         azureSubscription: 'acrpull'
+#         scriptType: 'bash'
+#         scriptLocation: 'inlineScript'
+#         inlineScript: |
+#           # Replace this with your Azure CLI command
+#            az aks update -n terraform-aks-dev-cluster -g terraform-aks-dev --attach-acr javancapstone
 
 
 
 
+  
+- stage: DeployDevEnv
+  displayName: 'DeployDevEnv'
+  jobs:
+  - job: DeployToKubernetesJob
+    displayName: 'Deploy to Kubernetes'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Kubernetes@1
+      inputs:
+        connectionType: 'Azure Resource Manager'
+        azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
+        azureResourceGroup: 'terraform-aks-dev'
+        kubernetesCluster: 'terraform-aks-dev-cluster'
+        namespace: 'default'
+        command: 'apply'
+        arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/01-Dev-namespace.yaml'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+        azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
+        azureContainerRegistry: 'javancapstone.azurecr.io'
+
+    - task: Kubernetes@1
+      inputs:
+        connectionType: 'Azure Resource Manager'
+        azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
+        azureResourceGroup: 'terraform-aks-dev'
+        kubernetesCluster: 'terraform-aks-dev-cluster'
+        namespace: 'dev-env'
+        command: 'apply'
+        arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/01-Dev-Environment/02-Dev-Deployment.yaml'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+        azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
+        azureContainerRegistry: 'javancapstone.azurecr.io'
+
+- stage: DeployQAEnv
+  displayName: 'DeployQAEnv'
+  jobs:
+  - job: DeployToKubernetesJob
+    displayName: 'Deploy to Kubernetes'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    
+    - task: Kubernetes@1
+      inputs:
+        connectionType: 'Azure Resource Manager'
+        azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
+        azureResourceGroup: 'terraform-aks-dev'
+        kubernetesCluster: 'terraform-aks-dev-cluster'
+        namespace: 'default'
+        command: 'apply'
+        arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/02-QA-Environment/01-QA-Namespace.yaml'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+        azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
+        azureContainerRegistry: 'javancapstone.azurecr.io'
+
+    - task: Kubernetes@1
+      inputs:
+        connectionType: 'Azure Resource Manager'
+        azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
+        azureResourceGroup: 'terraform-aks-dev'
+        kubernetesCluster: 'terraform-aks-dev-cluster'
+        namespace: 'qa-env'
+        command: 'apply'
+        arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/02-QA-Environment/02-QA-Deployment.yaml'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+        azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
+        azureContainerRegistry: 'javancapstone.azurecr.io'
+
+    
+
+- stage: DeployProdEnv
+  displayName: 'DeployProdEnv'
+  jobs:
+  - job: DeployToKubernetesJob
+    displayName: 'Deploy to Kubernetes'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    
+    - task: Kubernetes@1
+      inputs:
+        connectionType: 'Azure Resource Manager'
+        azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
+        azureResourceGroup: 'terraform-aks-dev'
+        kubernetesCluster: 'terraform-aks-dev-cluster'
+        namespace: 'default'
+        command: 'apply'
+        arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/03-Prod-Environment/01-Prod-Namespace.yaml'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+        azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
+        azureContainerRegistry: 'javancapstone.azurecr.io'
+
+    - task: Kubernetes@1
+      inputs:
+        connectionType: 'Azure Resource Manager'
+        azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
+        azureResourceGroup: 'terraform-aks-dev'
+        kubernetesCluster: 'terraform-aks-dev-cluster'
+        namespace: 'qa-env'
+        command: 'apply'
+        arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/03-Prod-Environment/02-Prod-Deployment.yaml'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+        azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
+        azureContainerRegistry: 'javancapstone.azurecr.io'
 
