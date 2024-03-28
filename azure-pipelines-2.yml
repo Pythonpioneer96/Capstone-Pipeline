@@ -314,7 +314,7 @@ stages:
         azureSubscriptionEndpoint: 'terraform-aks-azurerm-svc-con'
         azureResourceGroup: 'terraform-aks-dev'
         kubernetesCluster: 'terraform-aks-dev-cluster'
-        namespace: 'qa-env'
+        namespace: 'prod-env'
         command: 'apply'
         arguments: '-f $(System.DefaultWorkingDirectory)/kube-manifests/03-Prod-Environment/02-Prod-Deployment.yaml'
         secretType: 'dockerRegistry'
