@@ -20,8 +20,6 @@ spec:
           image: javancapstone.azurecr.io/capstonedockertest1:e3a320387a06adeb2c724b3b8493b56f933e3050
           ports:
             - containerPort: 80
-      imagePullSecrets:
-        - name: acr-credentials
       nodeSelector:
         app: system-apps
 
