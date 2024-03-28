@@ -283,7 +283,19 @@ stages:
         azureSubscriptionEndpointForSecrets: 'terraform-aks-azurerm-svc-con'
         azureContainerRegistry: 'javancapstone.azurecr.io'
 
-    
+- stage: ManualValidation
+  displayName: 'Manual Validation'
+  jobs:
+  - job: ManualValidationJob
+    displayName: 'Manual Validation'
+    pool: server
+    steps:
+    - task: ManualValidation@0
+      displayName: 'Manual Validation'
+      inputs:
+        notifyUsers: 'javancrosdale@gmail.com'
+        instructions: 'Approve Prod-Environment'
+
 
 - stage: DeployProdEnv
   displayName: 'DeployProdEnv'
